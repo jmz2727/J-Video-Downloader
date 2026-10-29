@@ -20,7 +20,7 @@ class TransportIntegrationTest {
     @Before fun setup() {
         server = MockWebServer(); server.start(0)
         // Test-only client maps a public-looking fixture hostname to the local test server.
-        val client = OkHttpClient.Builder().dns { listOf(InetAddress.getByName("127.0.0.1")) }.followRedirects(false).followSslRedirects(false).build()
+        val client = OkHttpClient.Builder().dns(object : Dns { override fun lookup(hostname: String) = listOf(InetAddress.getByName("127.0.0.1")) }).followRedirects(false).followSslRedirects(false).build()
         transport = MediaTransport(client)
         // Production accepts only ports 80/443. Bind a test request with port 80 and redirect its
         // socket with a test-only interceptor, preserving production URL validation.

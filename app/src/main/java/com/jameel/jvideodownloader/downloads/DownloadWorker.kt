@@ -8,7 +8,9 @@ import android.os.Build
 import android.os.StatFs
 import androidx.core.app.NotificationCompat
 import androidx.work.*
-import com.jameel.jvideodownloader.*
+import com.jameel.jvideodownloader.JVideoApp
+import com.jameel.jvideodownloader.MainActivity
+import com.jameel.jvideodownloader.R
 import com.jameel.jvideodownloader.core.MediaPolicy
 import com.jameel.jvideodownloader.core.MediaSniffer
 import java.io.BufferedInputStream

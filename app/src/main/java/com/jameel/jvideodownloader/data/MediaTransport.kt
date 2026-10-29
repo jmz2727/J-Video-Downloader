@@ -35,11 +35,11 @@ class MediaTransport(private val client: OkHttpClient = defaultClient()) : Platf
         val activeClient = if (network == null) client else client.newBuilder()
             .socketFactory(network.socketFactory)
             .connectionPool(ConnectionPool(0, 1, TimeUnit.SECONDS))
-            .dns { host ->
-                network.getAllByName(host).toList().also { addresses ->
+            .dns(object : Dns {
+                override fun lookup(hostname: String): List<InetAddress> = network.getAllByName(hostname).toList().also { addresses ->
                     if (addresses.isEmpty() || addresses.any { !MediaPolicy.publicAddress(it) }) throw UnknownHostException("UNSAFE_HOST")
                 }
-            }.build()
+            }).build()
         var next = url
         repeat(6) {
             try { if(signed) MediaPolicy.validateMedia(next) else MediaPolicy.validate(next, allowHttp) } catch (_: Exception) { throw MediaFailure("INVALID_URL") }
