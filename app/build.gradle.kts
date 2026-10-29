@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -77,7 +79,7 @@ val verifyPinnedEngine by tasks.registering {
     doLast {
         val engine = file("src/main/assets/yt-dlp-2026.10.26.zip")
         check(engine.isFile) { "Missing pinned engine: run python tools/prepare-engine.py" }
-        val hash = java.security.MessageDigest.getInstance("SHA-256")
+        val hash = MessageDigest.getInstance("SHA-256")
         engine.inputStream().use { input ->
             val buffer = ByteArray(65536)
             while (true) { val n = input.read(buffer); if (n < 0) break; hash.update(buffer, 0, n) }
