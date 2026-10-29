@@ -1,0 +1,55 @@
+{
+  "project": "J Video Downloader",
+  "version": "1.1.0-dev",
+  "date": "2026-10-29",
+  "timezone": "Asia/Aden",
+  "build_status": "BLOCKED",
+  "apk": null,
+  "repository": "jmz2727/J-Video-Downloader",
+  "repository_visibility": "public",
+  "repository_writes": false,
+  "host_policy_assertions": {
+    "passed": 87,
+    "failed": 0
+  },
+  "host_extractor_security_assertions": {
+    "passed": 28,
+    "failed": 0
+  },
+  "project_resource_engine_integrity_checks": {
+    "passed": 154,
+    "failed": 0
+  },
+  "workflow_structural_checks": {
+    "passed": 7,
+    "remote_run": null
+  },
+  "engine": {
+    "version": "2026.10.26",
+    "bytes": 3073072,
+    "sha256": "e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3",
+    "asset_verified": true,
+    "ejs_included": true,
+    "host_version_options_test": "PASS",
+    "host_extractor_registrations": [
+      "youtube",
+      "instagram",
+      "twitter",
+      "facebook"
+    ],
+    "android_runtime_test": "NOT_EXECUTED"
+  },
+  "android_compilation": "NOT_EXECUTED",
+  "gradle_tests": "NOT_EXECUTED",
+  "device_tests": "NOT_EXECUTED",
+  "platform_downloads": {
+    "YouTube": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
+    "Instagram": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
+    "X": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
+    "Facebook": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED"
+  },
+  "storage": "APP_PRIVATE_INTERNAL",
+  "remote_plaintext": "DISALLOWED_IN_PRODUCTION_PATHS",
+  "ffmpeg_included": false,
+  "native_bootstrap_dependencies_downloaded_locally": false
+}

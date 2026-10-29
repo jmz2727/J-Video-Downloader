@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+**/build/
+local.properties
+*.jks
+*.keystore
+*.apk
+
+# Fetched from the immutable upstream release and hash checked before every build.
+/app/src/main/assets/yt-dlp-*.zip

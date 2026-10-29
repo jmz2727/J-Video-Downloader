@@ -1,0 +1,5 @@
+PASS: 87 policy/signature assertions; production Java classes compiled with JDK 17.0.20
+PASS: 28 extractor process, TLS gate, signed-URL and native codec policy assertions
+PASS: 146 XML, localization, resource, wrapper and project integrity checks
+PASS: 154 total project/resource/pinned-engine integrity checks
+PASS: pinned engine CLI version/options and four platform extractor registrations (host only; no live downloads)
