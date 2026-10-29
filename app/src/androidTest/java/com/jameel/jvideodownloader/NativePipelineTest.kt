@@ -54,7 +54,12 @@ class NativePipelineTest {
             try {
                 probe.setDataSource(output.absolutePath)
                 val mimes=(0 until probe.trackCount).map { probe.getTrackFormat(it).getString(MediaFormat.KEY_MIME) }
-                assertTrue(mimes.contains("video/avc")); assertTrue(mimes.contains("audio/mp4a-latm"))
+                assertTrue("Missing video: $mimes",mimes.contains("video/avc"))
+                assertTrue("Missing audio: $mimes",mimes.contains("audio/mp4a-latm"))
+                for(track in 0 until probe.trackCount) {
+                    val duration=probe.getTrackFormat(track).getLong(MediaFormat.KEY_DURATION)
+                    assertTrue("Unexpected duration $duration",duration in 900000L..1200000L)
+                }
             } finally { probe.release() }
             val row=DownloadRecord(id,"https://example.com/own-fixture.mp4","Owned fixture",fileName="$id.mp4",mime="video/mp4")
             uri=storage.publish(row,output) {}.toString()

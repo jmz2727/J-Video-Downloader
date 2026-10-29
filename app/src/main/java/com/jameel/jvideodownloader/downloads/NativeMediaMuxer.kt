@@ -30,17 +30,44 @@ class NativeMediaMuxer {
             writer.start(); started=true
             val buffer=ByteBuffer.allocateDirect(8 * 1024 * 1024)
             val info=MediaCodec.BufferInfo()
-            // Interleave by presentation time; media bytes stay on disk except one bounded sample.
-            while(videoReader.sampleTime>=0 || audioReader.sampleTime>=0) {
+            if(videoReader.sampleTrackIndex<0 || audioReader.sampleTrackIndex<0) throw MediaFailure("INCOMPLETE")
+            // AAC priming/B-frames can have negative PTS. Only sampleTrackIndex signals EOF.
+            val earliest=minOf(0L,videoReader.sampleTime,audioReader.sampleTime)
+            if(earliest==Long.MIN_VALUE) throw MediaFailure("MUX_UNSUPPORTED")
+            val offset=-earliest
+            val samples=IntArray(2)
+            val lastPts=LongArray(2) { -1L }
+            // Shift both tracks equally, preserving relative synchronization.
+            while(videoReader.sampleTrackIndex>=0 || audioReader.sampleTrackIndex>=0) {
                 currentCoroutineContext().ensureActive()
-                val useVideo=audioReader.sampleTime<0 || videoReader.sampleTime>=0 && videoReader.sampleTime<=audioReader.sampleTime
+                val useVideo=audioReader.sampleTrackIndex<0 || videoReader.sampleTrackIndex>=0 && videoReader.sampleTime<=audioReader.sampleTime
                 val reader=if(useVideo) videoReader else audioReader
                 buffer.clear()
                 val count=reader.readSampleData(buffer,0)
-                if(count<0) break
+                if(count<=0) throw MediaFailure("INCOMPLETE")
                 if(count>buffer.capacity() || reader.sampleFlags and MediaExtractor.SAMPLE_FLAG_ENCRYPTED != 0) throw MediaFailure("MUX_UNSUPPORTED")
-                info.set(0,count,reader.sampleTime,if(reader.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC != 0) MediaCodec.BUFFER_FLAG_KEY_FRAME else 0)
-                writer.writeSampleData(if(useVideo) vout else aout,buffer,info); reader.advance()
+                if(reader.sampleTime>Long.MAX_VALUE-offset) throw MediaFailure("MUX_UNSUPPORTED")
+                val timestamp=reader.sampleTime+offset
+                val slot=if(useVideo) 0 else 1
+                info.set(0,count,timestamp,if(reader.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC != 0) MediaCodec.BUFFER_FLAG_KEY_FRAME else 0)
+                buffer.limit(count)
+                writer.writeSampleData(if(useVideo) vout else aout,buffer,info)
+                samples[slot]++; lastPts[slot]=maxOf(lastPts[slot],timestamp); reader.advance()
+            }
+            if(samples.any { it==0 }) throw MediaFailure("INCOMPLETE")
+            if(mime=="video/mp4") {
+                for((slot,format) in listOf(vf,af).withIndex()) {
+                    if(format.containsKey(MediaFormat.KEY_DURATION)) {
+                        val duration=format.getLong(MediaFormat.KEY_DURATION)
+                        if(duration>0 && duration<Long.MAX_VALUE-offset) {
+                            val end=duration+offset
+                            if(end>lastPts[slot]) {
+                                info.set(0,0,end,MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                                writer.writeSampleData(if(slot==0) vout else aout,ByteBuffer.allocate(0),info)
+                            }
+                        }
+                    }
+                }
             }
             writer.stop(); started=false
         } catch(e: Throwable) { output.delete(); throw e }
