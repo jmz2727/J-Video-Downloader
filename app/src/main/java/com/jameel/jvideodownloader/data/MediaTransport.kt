@@ -48,7 +48,7 @@ class MediaTransport(private val client: OkHttpClient = defaultClient()) : Platf
             if (headers.isNotEmpty()) {
                 for ((name,value) in headers) if(name in listOf("User-Agent","Referer","Origin") && value.length<=4096 && value.none { it.code<32 || it.code==127 }) builder.header(name,value)
             }
-            if (probe) builder.header("Range", "bytes=0-0")
+            if (probe) builder.header("Range", "bytes=0-31")
             val call = activeClient.newCall(builder.build())
             val response = suspendCancellableCoroutine<Response> { c ->
                 c.invokeOnCancellation { call.cancel() }
@@ -82,7 +82,16 @@ class MediaTransport(private val client: OkHttpClient = defaultClient()) : Platf
     }
     override suspend fun analyze(url: String, allowHttp: Boolean) = withContext(Dispatchers.IO) {
         open(url, allowHttp, true).use { response ->
-            val mime = mime(response)
+            val declared=response.header("Content-Type")?.substringBefore(';')?.lowercase()?.trim()
+            val mime=if(declared==null || declared=="application/octet-stream") {
+                val extension=response.request.url.pathSegments.lastOrNull()?.substringAfterLast('.', "")?.lowercase()
+                val candidate=types.entries.firstOrNull { it.value==extension }?.key ?: throw MediaFailure("UNSUPPORTED_MEDIA")
+                val prefix=ByteArray(16); var count=0
+                val stream=response.body?.byteStream() ?: throw MediaFailure("UNAVAILABLE")
+                while(count<prefix.size) { val n=stream.read(prefix,count,prefix.size-count); if(n<0) break; count+=n }
+                if(!com.jameel.jvideodownloader.core.MediaSniffer.matches(prefix.copyOf(count),candidate)) throw MediaFailure("UNSUPPORTED_MEDIA")
+                candidate
+            } else mime(response)
             val length = if (response.code == 206) response.header("Content-Range")?.substringAfterLast('/')?.toLongOrNull() ?: -1 else response.body?.contentLength() ?: -1
             val title = MediaPolicy.sanitize(runCatching { URLDecoder.decode(response.request.url.pathSegments.lastOrNull().orEmpty().replace("+", "%2B"), "UTF-8") }.getOrDefault("media")).substringBeforeLast('.', "media")
             MediaInfo(url.trim(), title.ifBlank { "media" }, mime, length, choices = listOf(MediaChoice("original","Original",mime,length,mime.startsWith("audio/"),listOf(MediaPart(url.trim(),mime,length)))))

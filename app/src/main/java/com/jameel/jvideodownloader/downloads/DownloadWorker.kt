@@ -60,7 +60,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                     val target = File(applicationContext.cacheDir,"$itemId-$index.part"); parts += target
                     app.transport.open(part.url, false, network = boundNetwork, signed = signed, headers = part.headers).use { response ->
                         val declared = response.header("Content-Type")?.substringBefore(';')?.lowercase()?.trim()
-                        val mime = if(signed && declared == "application/octet-stream") part.mime else app.transport.mime(response)
+                        val mime = if(declared==null || declared == "application/octet-stream") part.mime else app.transport.mime(response)
                         if(mime != part.mime) throw MediaFailure("MEDIA_CHANGED")
                         if(response.code==206 || response.header("Content-Range")!=null) throw MediaFailure("INCOMPLETE")
                         val body=response.body ?: throw MediaFailure("UNAVAILABLE")

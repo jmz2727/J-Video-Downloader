@@ -44,6 +44,18 @@ class TransportIntegrationTest {
             assertEquals("/fixture.mp4", server.takeRequest().path)
         } finally { file.delete() }
     }
+    @Test fun genericBinaryMp4RequiresMatchingContainerSignature() = runBlocking {
+        val original=fixture()
+        server.enqueue(MockResponse().setHeader("Content-Type","application/octet-stream").setBody(Buffer().write(original)))
+        val info=transport.analyze(url,true)
+        assertEquals("video/mp4",info.mime); assertEquals(original.size.toLong(),info.size)
+        assertEquals("bytes=0-31",server.takeRequest().getHeader("Range"))
+    }
+    @Test fun genericBinaryHtmlCannotMasqueradeAsMp4() = runBlocking {
+        server.enqueue(MockResponse().setHeader("Content-Type","application/octet-stream").setBody("<html>not media</html>"))
+        try { transport.analyze(url,true); fail("must reject HTML") }
+        catch(e: MediaFailure) { assertEquals("UNSUPPORTED_MEDIA",e.code) }
+    }
     @Test fun rejectsHtmlWithoutDownloadingIt() = runBlocking {
         server.enqueue(MockResponse().setHeader("Content-Type", "text/html").setBody("<html>private</html>"))
         transport.open(url, true).use { response -> assertThrows(MediaFailure::class.java) { transport.mime(response) } }
