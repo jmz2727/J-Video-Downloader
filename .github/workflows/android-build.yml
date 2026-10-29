@@ -38,7 +38,7 @@ jobs:
           chmod +x gradlew tools/host-check.sh
           ./tools/host-check.sh
       - name: Install required SDK packages
-        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - name: Unit and local integration tests
         run: ./gradlew testDebugUnitTest --stacktrace
       - name: Lint and build Debug APK
@@ -90,7 +90,7 @@ jobs:
       - run: |
           chmod +x gradlew
           python3 tools/prepare-engine.py
-          sdkmanager "platforms;android-37" "build-tools;36.0.0"
+          sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
