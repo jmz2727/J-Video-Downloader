@@ -14,12 +14,21 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ArabicRtlTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()
-    @Test fun arabicResourcesAndRtlDirection() {
-        val config=Configuration(ui.activity.resources.configuration).apply { setLocales(android.os.LocaleList.forLanguageTags("ar")) }
-        val localized=ui.activity.createConfigurationContext(config)
-        assertEquals("الرئيسية", localized.getString(R.string.home))
-        assertEquals(View.LAYOUT_DIRECTION_RTL, localized.resources.configuration.layoutDirection)
+    @Test fun switchingLanguageRendersArabicAndRtl() {
         ui.onNodeWithText(ui.activity.getString(R.string.settings)).performClick()
-        ui.onNodeWithText("العربية").assertExists()
+        ui.onNodeWithText("العربية").performClick()
+        try {
+            ui.waitUntil(10000) { ui.onAllNodesWithText("الإعدادات").fetchSemanticsNodes().isNotEmpty() }
+            assertEquals("ar",ui.activity.resources.configuration.locales[0].language)
+            assertEquals(View.LAYOUT_DIRECTION_RTL,ui.activity.resources.configuration.layoutDirection)
+            ui.onNodeWithText("الرئيسية").performClick()
+            ui.onNodeWithText("رابط الوسائط").assertExists()
+        } finally {
+            ui.runOnUiThread {
+                val app=ui.activity.application as JVideoApp
+                app.settings.update(app.settings.current.copy(language="en"))
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+            }
+        }
     }
 }

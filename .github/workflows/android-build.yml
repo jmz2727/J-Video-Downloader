@@ -53,13 +53,31 @@ jobs:
             "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$apk"
             sha256sum "$apk" > "$apk.sha256"
           done
-      - name: Upload verified APK
+      - name: Upload verified arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
-          name: J-Video-Downloader-debug
+          name: J-Video-Downloader-arm64-v8a-debug
           path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/debug/*.apk.sha256
+            app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+            app/build/outputs/apk/debug/app-arm64-v8a-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload verified armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: J-Video-Downloader-armeabi-v7a-debug
+          path: |
+            app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
+            app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload verified x86_64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: J-Video-Downloader-x86_64-debug
+          path: |
+            app/build/outputs/apk/debug/app-x86_64-debug.apk
+            app/build/outputs/apk/debug/app-x86_64-debug.apk.sha256
           if-no-files-found: error
           retention-days: 14
       - name: Upload build and test reports
@@ -70,9 +88,10 @@ jobs:
           path: |
             app/build/reports/
             app/build/test-results/
+            app/schemas/
           if-no-files-found: warn
   device-tests:
-    if: github.event_name == 'workflow_dispatch' && inputs.device_tests
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.device_tests)
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -102,7 +121,13 @@ jobs:
           arch: x86_64
           profile: pixel_2
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --stacktrace
+          script: |
+            mkdir -p app/build/reports/androidTests
+            trap 'adb logcat -d > app/build/reports/androidTests/logcat.txt' EXIT
+            ./gradlew connectedDebugAndroidTest --stacktrace
+            adb shell am start -n com.jameel.jvideodownloader/.MainActivity
+            adb shell screencap -p /sdcard/j-video-home.png
+            adb pull /sdcard/j-video-home.png app/build/reports/androidTests/home.png
       - if: always()
         uses: actions/upload-artifact@v4
         with:
