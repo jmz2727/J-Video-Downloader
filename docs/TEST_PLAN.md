@@ -1,31 +1,32 @@
-# v2 verification gates
+# Test coverage and remaining verification
 
-## Actually executed
+Verified run: https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375
+Tested source: e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358 (2026-10-29).
 
-- 87 assertions on the exact production Java URL/platform/signature/state/retry policy.
-- 28 assertions on the exact production TLS tunnel gate, signed-URL distinction, native mux codec/API policy and bounded process. Cases: no/incorrect proxy auth, plaintext proxy request, non-443 port, private/metadata destination, mixed public/private DNS, argument literal preservation without a shell, subprocess stdout overflow, timeout, interruption/cleanup.
-- 154 total XML, localization, resource, Gradle-wrapper/project, private FileProvider, remote-cleartext, pinned engine hash/ZIP/EJS/config-policy checks.
-- 7 workflow structural assertions; build-step shell syntax.
-- Executed the pinned official Python engine's `--version` with the configured CLI switches on the available host Python; result 2026.10.26, exit 0, no platform request. NOT Android JNI/QuickJS execution.
+## Actually executed: PASS
 
-## Automated sources included but NOT RUN
+- Host production Java policy: 87 assertions.
+- Host TLS gate/process/signed URL/codec policy: 28 assertions, including auth rejection, plaintext/non-443 refusal, private/mixed DNS destinations, literal argv, timeout/overflow/interruption.
+- Project/resource/engine integrity: 166 total checks.
+- JUnit/Robolectric: 28 tests across PolicyTest (4), FormatCatalogTest (3), TransportIntegrationTest (11), PrivateStorageTest (2), DatabaseTest (6), QueueTest (1), SettingsTest (1).
+- Lint, Kotlin/resources/Room compilation and all three ABI Debug APKs; actual apksigner verification.
+- Android API 35 x86_64 emulator: 6 tests, zero skipped/failures. Navigation, malformed URL, clipboard, Arabic UI/RTL, Android Python/QuickJS/CA initialization, actual MP4 H264/AAC mux with duration/both-track checks, private storage, and complete real HTTPS UI/worker/hash/history/confirmed-delete workflow.
+- Post-test APK installation and cold activity start returned Status: ok; screenshot/logcat collected.
 
-- Existing JUnit policy/HTTP copy/retry/cancellation/error tests; Room database lifecycle, duplicate constraint, guarded cancellation, persistence and history clearing; queue permit and preference persistence.
-- `FormatCatalogTest`: actual returned-format selection, MP4/WebM pairing, audio-only, signed in-memory media URLs, insecure/DRM/private/HLS-only format rejection. These are synthetic metadata fixtures, not live platform tests.
-- `PrivateStorageTest`: atomic internal publication, narrow content URI, file deletion/missing-file handling, cancellation without exposing a partial final file.
-- Compose navigation, invalid link, clipboard, settings choice and Arabic configuration tests. No full quality-choice→native-extraction→download UI test or rendered RTL screenshot test has run.
+Reports: test-and-lint-reports and device-test-reports artifacts on the run. The screenshot was collected but no manual visual inspection of that final screenshot was completed.
 
-## Run after private repository target is available
+The live HTTPS test uses only our small owned MP4 fixture. Format catalog tests use metadata fixtures. Neither establishes a successful YouTube, Instagram, X or Facebook download.
 
-1. First run host checks → `testDebugUnitTest` → `lintDebug assembleDebug`. Read and fix actual logs. Do not disable security checks or claim success from YAML validity.
-2. Verify all produced ABI APKs with `apksigner`, recorded SHA256 and package/min/target SDK inspection. Confirm native Python/QuickJS packaging/initialization on the actual supported ABI and on 4 KiB/16 KiB page-size devices. No FFmpeg-dependent path should be called.
-3. Install, cold launch and navigate in Arabic/English; test restart/rotation, themes, large font, TalkBack, narrow screens and real Compose RTL. Settings and Room history must persist.
-4. Use **permitted owner-provided public test URLs** for YouTube, Instagram, X and Facebook separately. Record date, URL/media identifier (avoid signed CDN tokens), engine version, APK hash, actual returned formats, chosen ID, output size/hash, player validation and failure logs redacted. Test audio and multiple resolutions only where they exist. Until then every platform remains experimental/unverified.
-5. Validate MP4 AVC/HEVC+AAC, WebM VP9+Opus on API 29+, AV1 MP4 on API 34+. Compare the merged output's streams, duration and A/V sync. Verify unknown/multipart progress shows bytes, not a fabricated percent; single-part percent is based on real response Content-Length.
-6. Verify all remote connections use verified TLS: bad certificate, downgrade redirect, redirect loop, private/metadata IP and DNS rebinding; test an extractor that follows an HTTP redirect and confirm the gate rejects it. The host tests cover the gate, not a complete native network audit.
-7. Test live/private/login/geo/DRM/expired/SABR/HLS/DASH-only responses. There must be a clear failure with no access bypass, invented qualities, silently changed selected format or simulated download.
-8. Inspect app-private directories/permissions, FileProvider exported=false, explicit grant behavior, no external default destination, no auth/signed URL database records or logs. Confirm cancellation never resurrects completion, pending-file cleanup after process death and no abandoned extraction proxy/process.
-9. Test cache full, large files, bounded memory (including native process RSS), malformed containers, mux cancellation/oversized sample, missing/moved files, network interruption/retry exhaustion and Wi-Fi→cellular switch. Wi-Fi-only jobs bind both extraction tunnels and download sockets to the chosen network.
-10. Validate Android background restrictions/notifications/force-stop/reboot. The app does not bypass JobScheduler/data-sync quotas and retries restart from zero.
+## Remaining checks
 
-A compatible source implementation is not proof of a working or secure application. The exact first compile/device failures must guide remaining fixes. There is no APK or live-platform success evidence in this delivery.
+1. **Physical phone/ABI:** Install ARM64 APK on the actual phone, cold launch, navigate Arabic/English and themes. Test API 26, other Android versions and 16 KiB page-size devices separately.
+2. **Each social platform separately:** Use permitted owner-provided public content. Record date, engine/APK hash, public media identifier, returned formats, chosen format ID, actual file size/hash and playback. Redact signed CDN tokens. Verify audio and multiple qualities only when actually returned. All four remain experimental until then.
+3. **Media range:** Test compatible HEVC, WebM VP9/Opus, AV1 on API 34+, A/V sync by playback, unknown-length and multipart byte progress. Do not infer universal codec support from the passing H264/AAC remux test.
+4. **Network security:** Complete native-engine redirect/downgrade/bad-certificate/private-DNS testing, including all subprocess network paths. Host gate tests are not a complete native networking audit.
+5. **Restrictions:** Live/private/login/geo/DRM/expired/SABR/HLS/DASH-only inputs must produce clear errors without fabricated qualities or access bypass.
+6. **Persistence/background:** Process death/reboot/force-stop, notification permissions, foreground-service/data-sync quotas, Wi-Fi to cellular changes and cancellation races. Unit tests cover guarded DB transitions; emulator activity recreation is not process-death coverage.
+7. **Storage/performance:** Large files, full disk, low RAM/native RSS, malformed/oversized samples, staging cleanup, interruption/retry exhaustion and secure explicit FileProvider grants on real devices.
+8. **UI accessibility:** TalkBack, large text, small screens, rendered RTL visual review and more navigation/share-intent combinations.
+9. **Distribution:** Stable release signing, native/dependency security/provenance and GPL corresponding-source review before broader binary redistribution.
+
+Do not mark an unexecuted check passed or claim full Snaptube parity. Existing passing tests and security checks must remain enabled.

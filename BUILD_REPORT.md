@@ -1,63 +1,85 @@
-# J Video Downloader — v2 build and security report
+# J Video Downloader — build and test report
 
-Date: 2026-10-29, Asia/Aden. Version: 1.1.0-dev (code 2).
+Date: 2026-10-29 UTC. Version: 1.1.0-dev (code 2).
 
-## Build status: BLOCKED / NOT ACCEPTANCE-COMPLETE
+## BUILD STATUS: PASS
 
-No Android build or APK was produced. No app launch, Android storage/muxing behavior or live platform download is claimed. The source is reviewable; the requested Snaptube-equivalent full support is **not established**.
+[GitHub Actions run 40936286375](https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375) completed successfully at 19:07:04 UTC for source commit `e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358`. Both `build` and `device-tests` passed. This supersedes the earlier blocked draft report. Public source changes were authorized by the user.
 
-The supplied GitHub repository `jmz2727/J-Video-Downloader` was checked twice: empty, public, and writable by the connected account. No files/settings/workflows were changed there. Earlier user instructions prohibited public publication. A private repository, or explicit authorization to publish source publicly, is required before uploading the source and running its workflow. Android SDK, Gradle distribution, Kotlin/Android dependencies and emulator are absent locally; no major local install was attempted.
+Real Debug APKs were assembled for arm64-v8a, armeabi-v7a and x86_64. CI checked each file existed and verified its signature using Android apksigner. Lint ran with abortOnError enabled. No security check or failing test was disabled to obtain success.
 
-## Changes implemented in source
+## APK delivery
 
-1. Public YouTube/Instagram/X/Facebook URLs use a yt-dlp extraction path instead of blanket refusal. Quality/audio choices come only from actual compatible HTTPS formats. There is no login, cookie import, DRM or regional-restriction bypass.
-2. Official engine 2026.10.26 pinned as a 3,073,072-byte asset, SHA256 `e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3`. Actual downloaded bytes match official release metadata; archive integrity and bundled EJS were checked. The engine CLI version and requested flags ran on host Python with exit 0. Android execution is untested.
-3. Android bootstrap `youtubedl-android:library:0.18.1` provides Python/QuickJS. Its native Maven dependencies were **not downloaded or tested locally**. No FFmpeg/aria2c dependency or automatic runtime updater is added. Review the first resolved dependency graph/native binaries before release.
-4. Bounded, interruptible process execution with separate fixed argv, no shell, 180s timeout, stdout 2 MiB, stderr 64 KiB; fixed extractor options ignore configs/plugins/caches and remote component downloads. Raw logs/stream tokens are not exposed.
-5. Authenticated loopback TLS CONNECT gate: public DNS/IP checks, pinned public destination, no HTTP forwarding/port downgrade, bounded connections/threads/header/read timeouts. The embedded client is configured to use it; full real-device/native network enforcement has not been audited.
-6. New files only in private internal app storage, atomic pending→final publication, narrow unexported FileProvider and explicit read grants on Open/Share. No default external Downloads/SAF/MediaStore. Files are removed by uninstall/clear-app-data. Signed media URLs remain in memory; the public original URL and selected format ID persist in Room v2, with migration from v1.
-7. Existing streaming downloader validates each URL/redirect/TLS, copies 64 KiB chunks and uses actual byte progress. Compatible multipart streams remux with native Android MediaExtractor/MediaMuxer and a bounded 8 MiB sample buffer. MP4 AVC/HEVC+AAC, AV1 on API 34+; WebM VP8/VP9+Vorbis or Opus on API 29+. Only available compatible formats up to 2160p are offered; no universal 4K/MP3 promise.
-8. Private-storage settings/Arabic-English messages, video/audio and quality selection, selected-format persistence, re-extraction for expired stream capabilities, ABI-split build/artifact handling and added tests/documentation.
+- ARM64: [J-Video-Downloader-arm64-v8a-debug](https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375/artifacts/12925690848).
+- Inner file: `app-arm64-v8a-debug.apk`, with `app-arm64-v8a-debug.apk.sha256`.
+- ZIP size: **35,618,181 bytes** (about 35.6 MB).
+- GitHub artifact ID: **12925690848**; expires **2026-11-12T19:02:48Z**.
+- **ZIP archive SHA256**: `bffed3ea92385d3bcfd0054d11dc9f1e5be972d0adfc19b8a16a8f7e2797d7af`.
+- This digest is for the artifact ZIP, not the inner APK. The inner APK's own SHA256 is in its sidecar.
+- Package `com.jameel.jvideodownloader`, min SDK 26, compile/target 37. Debug signing only; no release keystore/public Release/store upload.
+- Separate armeabi-v7a and x86_64 artifacts are on the same run. Download only the device's ABI.
 
-## Executed evidence
+The verified final APK is delivered through GitHub Actions. The local execution environment became unavailable during final delivery; consequently no standalone copy of this final APK was attached to the chat. Older local candidate APKs are not the final deliverable.
 
-| Check | Result | Scope |
+## Actual executed results
+
+| Check | Result | Evidence/scope |
 |---|---|---|
-| Production Java URL/platform/state/retry/container rules | PASS: 87 assertions | Actually compiled with available Java runtime's compiler module |
-| Production TLS gate / bounded process / signed URL / codec policy | PASS: 28 assertions | Actual loopback/process tests, including refusal/timeout/overflow/interruption; no remote platform download |
-| Project/resources/localizations/private storage/engine integrity | PASS: 154 checks total | Not Kotlin or Android compilation |
-| GitHub workflow YAML structure | PASS: 7 assertions | Workflow not uploaded or run |
-| Workflow build shell blocks | PASS: shell syntax | No Gradle task executed |
-| Pinned official engine asset | PASS: digest/ZIP/EJS; host `--version` returns 2026.10.26 | Not Android Python/QuickJS initialization |
-| Gradle Wrapper | Present, complete; unchanged verified 9.3.1 wrapper JAR and distribution checksum | Gradle distribution not installed/run |
+| Production Java URL/platform/state/retry/signature policy | PASS: 87 assertions | CI host-check stdout |
+| TLS CONNECT gate, bounded process, signed URL and codec policy | PASS: 28 assertions | CI host-check stdout; actual local process/loopback cases |
+| Resource/localization/wrapper/project/engine integrity | PASS: 166 total checks | 158 base + 8 engine/security checks in CI |
+| JUnit/Robolectric | PASS: 28 tests across 7 classes | `testDebugUnitTest` succeeded; test-and-lint-reports artifact |
+| Lint + Kotlin/resources/Room compilation | PASS | `lintDebug assembleDebug` succeeded |
+| ABI APK signature verification | PASS: all 3 APKs | `apksigner verify --verbose` in build job |
+| Android instrumentation | PASS: 6 tests, 0 skipped, 0 failed | API 35 x86_64 Pixel 2 emulator, device-test-reports artifact |
+| Install and launch after tests | PASS | `installDebug` succeeded; `am start -W` returned `Status: ok`; screenshot collected |
 
-Exact host stdout: `docs/host-checks.txt`; machine-readable state: `docs/verification.json`.
+Unit/integration coverage includes URL/platform rules, actual format catalog parsing using fixture metadata, HTTPS transport fixtures, MIME/signature mismatch, cancellation/interruption/retry, queue permits, private atomic publication/FileProvider, Room persistence/duplicate/cancellation/history operations and settings persistence.
+
+The six Android tests exercised:
+1. Navigation and malformed URL behavior.
+2. Clipboard paste.
+3. Arabic language selection, Arabic UI text and actual RTL configuration.
+4. Pinned Android Python engine version, QuickJS execution and CA roots.
+5. Real H264/AAC MP4 remux with both tracks and duration checks, private publication/deletion.
+6. A full UI workflow against our owned public HTTPS MP4: analyze → actual quality choice → WorkManager transfer → exact SHA256 match → private file existence → activity recreation/history → confirmed delete → file and row removal. Optional completion notifications were disabled to test that valid setting.
+
+Test fixture: `https://raw.githubusercontent.com/jmz2727/J-Video-Downloader/main/app/src/test/resources/fixture.mp4`. This tiny owned fixture is not a social-platform verification or a large-file benchmark. The native tests execute x86_64 binaries; ARM64 APK was built/signature-verified, not run on physical ARM64 hardware.
 
 ## Platform status
 
-| Input | Implementation | Actual download verification |
+| Platform | Status | Evidence |
 |---|---|---|
-| Direct HTTPS media | Implemented in source | NOT RUN on Android |
-| YouTube public page | Experimental yt-dlp integration implemented | NOT RUN live |
-| Instagram public page | Experimental yt-dlp integration implemented | NOT RUN live |
-| X/Twitter public page | Experimental yt-dlp integration implemented | NOT RUN live |
-| Facebook public page | Experimental yt-dlp integration implemented | NOT RUN live |
-| Private/login/DRM/region-restricted | No bypass implemented | Unsupported where access is required |
-| HLS/DASH/SABR-only, live, incompatible codec/mux | Filtered or clear error | Unsupported in this source version |
+| Direct HTTPS MP4 | Implemented and tested | Full real Android UI/worker/private-file/hash/history/delete flow passed |
+| YouTube | Partially supported / experimental, not live-tested | yt-dlp public-page path and real-format selection implemented; Android runtime tested, no successful live page extraction/download recorded |
+| Instagram | Partially supported / experimental, not live-tested | Same implementation-level evidence; no live download recorded |
+| X/Twitter | Partially supported / experimental, not live-tested | Same implementation-level evidence; no live download recorded |
+| Facebook | Partially supported / experimental, not live-tested | Same implementation-level evidence; no live download recorded |
+| Private/login/DRM/region restricted | Unsupported where access is required | No authentication/access restriction bypass |
+| HLS/DASH/SABR-only, live, incompatible formats | Unsupported | Filtered or understandable error; no simulated download |
 
-## Tests not executed / risks
+Full Snaptube parity and universal resolutions are not claimed.
 
-- All Gradle JUnit/Robolectric tests, including new format parsing and private publication tests. Test sources can still have compile/runtime errors.
-- Kotlin/resources/lint compilation, dependency/ABI resolution, Room schema/migration validation and native runtime packaging.
-- APK creation, signing/package verification, install/launch, complete UI workflow, actual Arabic layout, background/reboot/cancellation behavior on Android.
-- Live platform extraction/audio/quality/4K downloads; native MP4/WebM output integrity and A/V sync; actual bad-certificate rejection and extractor redirect behavior; native process RSS/16 KiB page compatibility.
-- Network safety does not certify arbitrary media as nonmalicious. The native runtime is a significant trusted dependency; process/output/media buffers do not hard-cap its complete RAM consumption or prove sandbox isolation from the app's own UID.
-- Compatible formats may be absent, anonymous access may fail, and upstream platform changes can break extraction. Failure is reported, not silently replaced with a lower quality.
-- Staging can require about 2× file size, or 3× for multipart/remux, plus 16 MiB. Downloads restart from zero; three automatic retries; strict FIFO not guaranteed; Android execution quotas still apply.
-- No stable release signing setup or public distribution. The GPLv3 bootstrap license and provenance references are included; distribution compliance for an unbuilt APK is not asserted.
+## Implemented features and security
 
-## Deliverables / next action
+Compose Material 3 with Arabic/English/RTL, themes, four main screens; manual/clipboard/share input; real metadata/format selection; modular WorkManager queue/cancel/retry/progress; Room v2 history/search/sort/filter; open/share/confirmed deletion; preferences/privacy; original icon; CI and tests.
 
-Updated complete source, pinned engine asset, original icon, tests, CI, README, privacy/test plan and this report. **APK: none.** No GitHub mutation/publication took place.
+Files use private internal storage, narrow unexported FileProvider and explicit read grants, atomic publication, backup/transfer exclusions and no broad storage permission. HTTPS validation rejects unsafe schemes, local/metadata targets and unsafe redirects. The native process uses fixed argv without a shell, bounded output/timeouts and an authenticated public-TLS CONNECT gate. Signed CDN URLs stay in memory. No backend, advertising, tracking, FFmpeg, MP3 converter or hidden engine updater is added.
 
-Make the supplied repository private (recommended for the stated personal scope), or explicitly authorize public source publication. Then upload and execute the basic build, fix actual logs to a passing APK, verify/install it and test the requested platforms individually. See README for Windows/GitHub steps. Historical v1 report is retained in `docs/V1_BUILD_REPORT.md` and does not describe the current source.
+Engine: yt-dlp **2026.10.26**, **3,073,072 bytes**, pinned SHA256 `e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3`, EJS included. Android bootstrap `io.github.junkfood02.youtubedl-android:library:0.18.1`. SDK package `platforms;android-37.0`, build-tools 36.0.0, JDK 17, AGP 9.1.1, Gradle 9.3.1, Kotlin 2.2.10.
+
+## Known limitations / not executed
+
+- Live anonymous social-platform extraction, audio and multiple qualities need separate verification using permitted owner-provided content. Platforms can change or reject anonymous access.
+- No MP3 conversion, DRM/authentication bypass, pause/resume, external storage location picker or universal 4K/transport support.
+- Physical ARM64 devices, API 26 and other OS versions, 16 KiB page-size compatibility, prolonged background/reboot quotas, native RAM profiling, multi-gigabyte files, accessibility/large-font and visual screenshot review were not executed.
+- The app bounds its own transfer/sample/process-output buffers; it does not hard-cap all Python/JNI memory or prove arbitrary files are harmless. A full native TLS/network/dependency audit is outstanding.
+- Retries start over and are capped at three after the initial attempt. Staging requires about 2× single-file or 3× multipart size plus 16 MiB. Uninstall/clear-data deletes private downloads.
+- No stable release signing is configured. Future debug CI runs may have a different signing certificate; uninstalling a conflicting build deletes app-private files, so export wanted files first.
+- Six passing emulator tests establish their listed scope, not all original acceptance criteria or full platform support.
+
+## Deliverables / remaining user action
+
+Source, icon, Android UI/engine/storage/history/settings/localizations, tests, complete Wrapper, CI, privacy/provenance docs and three verified APK artifacts are in the supplied repository/run. Historical v1 report remains labeled in `docs/V1_BUILD_REPORT.md`.
+
+Install the ABI-appropriate APK, then verify the desired permitted platform links on the actual phone. No repository credentials, local SDK installation or additional account authorization is needed for this delivered build.

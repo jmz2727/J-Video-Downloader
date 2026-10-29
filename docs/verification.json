@@ -1,13 +1,51 @@
 {
   "project": "J Video Downloader",
   "version": "1.1.0-dev",
+  "version_code": 2,
   "date": "2026-10-29",
-  "timezone": "Asia/Aden",
-  "build_status": "BLOCKED",
-  "apk": null,
+  "timezone": "UTC",
+  "build_status": "PASS",
+  "acceptance_status": "PARTIAL_SOCIAL_PLATFORM_LIVE_TESTS_AND_PHYSICAL_DEVICE_PENDING",
   "repository": "jmz2727/J-Video-Downloader",
   "repository_visibility": "public",
-  "repository_writes": false,
+  "repository_writes": true,
+  "tested_source_commit": "e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358",
+  "tested_source_tree": "3f6addab64e0d4d4dcc3ed808a73edb343daaf1f",
+  "workflow": {
+    "run_id": 40936286375,
+    "url": "https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375",
+    "conclusion": "success",
+    "completed_at": "2026-10-29T19:07:04Z",
+    "build_job": 123667689496,
+    "device_job": 123668422674
+  },
+  "apk": {
+    "file_name": "app-arm64-v8a-debug.apk",
+    "abi": "arm64-v8a",
+    "artifact_id": 12925690848,
+    "artifact_url": "https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375/artifacts/12925690848",
+    "archive_bytes": 35618181,
+    "archive_sha256": "bffed3ea92385d3bcfd0054d11dc9f1e5be972d0adfc19b8a16a8f7e2797d7af",
+    "inner_apk_sha256": "See app-arm64-v8a-debug.apk.sha256 inside artifact",
+    "signature_verification": "PASS_APKSIGNER",
+    "expires_at": "2026-11-12T19:02:48Z",
+    "signing": "DEBUG",
+    "standalone_chat_attachment": false
+  },
+  "android": {
+    "application_id": "com.jameel.jvideodownloader",
+    "min_sdk": 26,
+    "target_sdk": 37,
+    "compile_sdk": 37,
+    "compilation": "PASS",
+    "lint": "PASS",
+    "abi_builds": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "physical_arm64_test": "NOT_EXECUTED"
+  },
   "host_policy_assertions": {
     "passed": 87,
     "failed": 0
@@ -17,12 +55,26 @@
     "failed": 0
   },
   "project_resource_engine_integrity_checks": {
-    "passed": 154,
+    "passed": 166,
     "failed": 0
   },
-  "workflow_structural_checks": {
-    "passed": 7,
-    "remote_run": null
+  "gradle_tests": {
+    "passed": 28,
+    "failed": 0,
+    "classes": 7,
+    "task": "testDebugUnitTest"
+  },
+  "device_tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "api": 35,
+    "abi": "x86_64",
+    "profile": "pixel_2",
+    "post_test_install": "PASS",
+    "post_test_launch": "Status: ok",
+    "screenshot_collected": true,
+    "screenshot_visual_review": "NOT_EXECUTED"
   },
   "engine": {
     "version": "2026.10.26",
@@ -30,19 +82,11 @@
     "sha256": "e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3",
     "asset_verified": true,
     "ejs_included": true,
-    "host_version_options_test": "PASS",
-    "host_extractor_registrations": [
-      "youtube",
-      "instagram",
-      "twitter",
-      "facebook"
-    ],
-    "android_runtime_test": "NOT_EXECUTED"
+    "android_python_quickjs_ca_test": "PASS_X86_64",
+    "bootstrap": "io.github.junkfood02.youtubedl-android:library:0.18.1"
   },
-  "android_compilation": "NOT_EXECUTED",
-  "gradle_tests": "NOT_EXECUTED",
-  "device_tests": "NOT_EXECUTED",
   "platform_downloads": {
+    "Direct_HTTPS_MP4": "PASS_OWNED_LIVE_FIXTURE_ANDROID_UI_WORKER_HASH_HISTORY_DELETE",
     "YouTube": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
     "Instagram": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
     "X": "IMPLEMENTED_EXPERIMENTAL_NOT_LIVE_TESTED",
@@ -51,5 +95,6 @@
   "storage": "APP_PRIVATE_INTERNAL",
   "remote_plaintext": "DISALLOWED_IN_PRODUCTION_PATHS",
   "ffmpeg_included": false,
-  "native_bootstrap_dependencies_downloaded_locally": false
+  "mp3_conversion": false,
+  "public_release_published": false
 }

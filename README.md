@@ -1,66 +1,68 @@
-# J Video Downloader — v2 secure extraction source
+# J Video Downloader
 
-**Status: source changes implemented and host-tested; Android compilation, APK and real platform downloads NOT VERIFIED.** No APK is included. Repository: https://github.com/jmz2727/J-Video-Downloader. The user explicitly authorized public source publication on 2026-10-29. Android build status must be established by the actual Actions run.
+**Debug build: PASS.** Version **1.1.0-dev**, package `com.jameel.jvideodownloader`, Android 8.0+ (API 26), target SDK 37. The [verified build and device-test run](https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375) built and signature-verified three real APKs. All 28 JUnit/Robolectric tests and all 6 Android emulator tests passed.
 
-## Changes
+## Install
 
-- Removed the blanket refusal at the repository layer for YouTube, Instagram, X/Twitter and Facebook. Those public page URLs now use yt-dlp metadata extraction. Private/login/DRM/geo restrictions are not bypassed.
-- Pin the official yt-dlp **2026.10.26** zipimport engine in APK assets; verify its SHA256 before installation to app-private storage. The asset is 3,073,072 bytes and includes EJS. The Android Python/QuickJS bootstrap is `youtubedl-android:library:0.18.1`. The official engine can be updated in a reviewed app build, not silently at runtime.
-- Show only actual HTTPS file formats returned by the extractor. Select Video + Audio or Audio only, then a format before downloading. No invented resolutions. Store the original public page and format ID; re-extract before a job to refresh expiring signed stream URLs. Signed stream URLs and limited User-Agent/Referer/Origin headers remain in memory only.
-- Download file parts with the existing streaming OkHttp engine, rechecking redirects/DNS/TLS. Progress uses actual copied bytes. Multipart totals remain unknown until completion rather than reporting an estimated percentage as real progress.
-- Remux compatible MP4/WebM tracks with Android `MediaExtractor`/`MediaMuxer`. MP4: AVC/HEVC + AAC (AV1 on API 34+); WebM: VP8/VP9 + Vorbis, or Opus on API 29+. These limits are device/OS dependent. No FFmpeg, aria2c or MP3 conversion dependency. HLS/DASH-only, SABR-only, live streams, incompatible codecs and DRM are not supported in this implementation.
-- New media is saved **only inside `filesDir/media/`**. Cache, pending files, history and engine files are private. No default shared Downloads, MediaStore or SAF location. Removal or clear-app-data deletes these files. FileProvider is not exported and exposes only the media directory, with per-URI temporary read grants from explicit Open/Share actions.
-- Remote cleartext is disabled in Android configuration and production URL calls. The native extractor is configured to use an authenticated loopback CONNECT tunnel, which allows TLS port 443 to resolved public IPs only, pins the resolved destination, limits connections/threads/headers/timeouts and refuses ordinary HTTP proxy requests. The HTTP loopback control connection itself never leaves the device. Python verifies server certificates using its bundled CA roots.
-- The extraction process uses a fixed argv list without a shell, ignores external configs/plugins, disables automatic remote components and caching, limits stdout to 2 MiB/stderr to 64 KiB, times out after 180s and kills its process on cancellation. One extraction and one file transfer/remux run at a time. An 8 MiB sample buffer bounds remuxing; media is never read wholly into RAM. These are safeguards, not a proof that all native runtime memory is bounded or every media file is harmless.
+1. Sign in to GitHub and [download the verified ARM64 artifact](https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375/artifacts/12925690848) (ZIP, 35,618,181 bytes). It contains `app-arm64-v8a-debug.apk` and its SHA256 sidecar. Actions retains this artifact until **2026-11-12**.
+2. Extract the ZIP and install that APK on an ARM64 Android device. Allow installation from the browser/file manager when Android asks. This is a debug build, not a release-signed store package.
+3. Paste or share a permitted HTTPS media/page URL, tap Analyze, choose an actual available format, then Download. Open/share a completed file explicitly from Downloads. Confirm before deleting a file.
 
-## Support matrix
+The same run includes separate `J-Video-Downloader-armeabi-v7a-debug` and `J-Video-Downloader-x86_64-debug` artifacts. Choose one matching the device; downloading all architectures is unnecessary. Re-run the workflow to regenerate expired artifacts. No public GitHub Release or store publication was made.
 
-| Source | Current code path | Verified downloads |
+## Verified scope
+
+| Source | Implementation | Verification |
 |---|---|---|
-| Direct HTTPS audio/video | Direct analyzer and streaming worker | Not run on Android |
-| YouTube | yt-dlp extraction + actual compatible formats | Not tested live |
-| Instagram | yt-dlp extraction + actual compatible formats | Not tested live |
-| X/Twitter | yt-dlp extraction + actual compatible formats | Not tested live |
-| Facebook | yt-dlp extraction + actual compatible formats | Not tested live |
+| Direct HTTPS MP4 | Metadata/signature analysis and streaming download | **PASS on Android emulator:** real owned HTTPS fixture, quality choice, WorkManager download, exact file hash, history after activity recreation, confirmed deletion |
+| YouTube | Public-page yt-dlp extraction and compatible returned formats | **Experimental / not live-tested** |
+| Instagram | Public-page yt-dlp extraction and compatible returned formats | **Experimental / not live-tested** |
+| X/Twitter | Public-page yt-dlp extraction and compatible returned formats | **Experimental / not live-tested** |
+| Facebook | Public-page yt-dlp extraction and compatible returned formats | **Experimental / not live-tested** |
 
-Do not advertise full platform support or equivalence with Snaptube. Extractors can break, require access unavailable anonymously, or return only unsupported transport/container formats. This version reports a clear failure instead of bypassing restrictions, silently choosing another quality or simulating a download. Rights/permission remain the user's responsibility.
+The bundled Python/QuickJS runtime and pinned engine version ran successfully on the x86_64 Android emulator. That does not verify a live extraction/download from any social platform. Full Snaptube equivalence is not established. No login, cookie import, DRM or regional restriction bypass is implemented.
 
-## Build with GitHub
+## Features
 
-1. The user authorized the supplied public repository. Keep APK distribution separate from source publication.
-2. Upload the contents of `JVideoDownloader/` from the ZIP at repository root, preserving `.github/` and `gradle/wrapper/gradle-wrapper.jar`.
-3. A source checkout first runs `python tools/prepare-engine.py` to fetch ~3 MiB from the pinned upstream release and verify SHA256. The source ZIP already includes this asset. Run **Actions → Android build**. Start without emulator tests. It runs the real host checks, JUnit/Robolectric tests, lint and assembly. Inspect actual failures before claiming success.
-4. On a passing build, obtain **J-Video-Downloader-debug**. ABI splits generate separate `app-arm64-v8a-debug.apk`, `app-armeabi-v7a-debug.apk` and `app-x86_64-debug.apk` (exact filenames must be checked against actual outputs). Android Note10-class devices normally use arm64; verify the actual device ABI. CI verifies each generated APK's signature and writes its SHA256.
-5. Only after the smoke build passes, enable optional device tests, then manually validate real permitted platform URLs, private file permissions, TLS refusal, native initialization and background behavior on a device.
+- Kotlin, Jetpack Compose Material 3, MVVM and separated domain/data/UI/download/storage layers.
+- Arabic/English with RTL; dark, light and system themes; Home, Downloads, History and Settings.
+- Manual input, clipboard and Android Share Intent; actual metadata and available compatible quality/audio choices.
+- WorkManager background queue, actual byte progress, cancellation, bounded retry/backoff, Wi-Fi preference and notifications.
+- Room v2 persistent history, search/sort/filter, open/share, missing-file handling and confirmed deletion.
+- App-private internal media storage; no broad storage permission or default shared Downloads destination.
+- Original J/video-download launcher icon, privacy screen, no tracking SDK, ads or backend.
 
-The native bootstrap adds substantial APK/build dependency size. **Those Maven/native dependencies, Android SDK and Gradle distribution have not been downloaded locally.** No FFmpeg package was fetched. The small (~3 MiB) official engine asset is included so the extraction logic is pinned/current rather than relying on the bootstrap's older bundled extractor. Exact APK size is unknown until a build runs. ABI splits avoid downloading every architecture to the phone.
+## Extraction, security and limits
 
-### Existing Windows Android tooling
+The official **yt-dlp 2026.10.26** zipimport engine is pinned by SHA256 and includes EJS. Android Python/QuickJS comes from `io.github.junkfood02.youtubedl-android:library:0.18.1`. There is no automatic engine updater, remote plugin loading, FFmpeg/aria2c package or MP3 conversion dependency.
 
-Do you already have JDK 17 and Android SDK 37 available? If not, use the GitHub path instead of a large local install.
+Only actual compatible HTTPS file formats are offered, up to 2160p when returned. MP4 supports AVC/HEVC + AAC, with AV1 on API 34+; WebM supports VP8/VP9 + Vorbis, or Opus on API 29+. Compatible multipart media uses Android MediaExtractor/MediaMuxer. HLS/DASH/SABR-only, live, DRM, inaccessible or incompatible media produces a clear error.
 
-```powershell
-Set-Location "C:\path\to\JVideoDownloader"
-java -version
-$env:ANDROID_HOME
-Test-Path .\gradle\wrapper\gradle-wrapper.jar
-python .\tools\prepare-engine.py
-.\gradlew.bat testDebugUnitTest --stacktrace
-.\gradlew.bat lintDebug assembleDebug --stacktrace
-Get-ChildItem .\app\build\outputs\apk\debug\*.apk
-Get-ChildItem .\app\build\outputs\apk\debug\*.apk | Get-FileHash -Algorithm SHA256
-# Only after the above passes, with a connected device or available emulator:
-.\gradlew.bat connectedDebugAndroidTest --stacktrace
+URL/redirect/DNS rules reject unsafe schemes, credentials, private/metadata destinations and TLS downgrades. The native extractor uses an authenticated loopback CONNECT gate restricted to public TLS destinations. Fixed argv uses no shell, with bounded output and a 180-second extraction timeout. TLS certificate verification remains enabled. These controls do not certify arbitrary remote content as harmless or establish a full native-network security audit.
+
+Downloads stream in 64 KiB chunks; remuxing uses a bounded 8 MiB sample buffer. One file transfer/remux and one extraction run at a time. Total native Python/runtime RAM is not hard-capped. Single-file jobs need about 2× file size, multipart jobs about 3× plus 16 MiB; retries restart from zero, at most three retries. Android execution quotas apply. Pause/resume, MP3 conversion and external location selection are unavailable.
+
+Files live in `filesDir/media/` and are removed by uninstall/clear-app-data. Atomic publication avoids exposing a partially downloaded final file. An unexported, narrowly scoped FileProvider grants temporary read access only through explicit Open/Share. Backup and device-transfer exclusions protect private files/history. Original public page URLs and selected format IDs persist; expiring signed CDN URLs and authorization headers do not.
+
+## Build and tests
+
+GitHub Actions performs host checks → unit/integration tests → lint/assembly → APK signature verification → separate ABI artifacts → API 35 x86_64 emulator tests on pushes. Reports and a post-test launch screenshot are retained as Actions artifacts.
+
+For an existing JDK 17 / Android SDK installation:
+
+```sh
+git clone https://github.com/jmz2727/J-Video-Downloader.git
+cd J-Video-Downloader
+python3 tools/prepare-engine.py
+chmod +x gradlew tools/host-check.sh
+./tools/host-check.sh
+./gradlew testDebugUnitTest lintDebug assembleDebug --stacktrace
+# With an available device/emulator:
+./gradlew connectedDebugAndroidTest --stacktrace
 ```
 
-AGP 9.1.1, Gradle 9.3.1, JDK 17, compile/target SDK 37, min SDK 26, built-in Kotlin/Compose compiler 2.2.10. The dependency versions and native packaging still need a real build to validate resolution and compatibility.
+Windows uses `gradlew.bat`. Install SDK package `platforms;android-37.0` and build-tools 36.0.0. AGP 9.1.1, Gradle 9.3.1 and Kotlin/Compose compiler 2.2.10 are pinned. The complete Gradle Wrapper, including its JAR and distribution checksum, is committed. The ignored ~3 MiB engine asset is fetched explicitly and hash-checked by the preparation script and preBuild.
 
-## Tests and limits
+Tested source commit: [`e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358`](https://github.com/jmz2727/J-Video-Downloader/commit/e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358). Subsequent documentation-only changes do not alter that tested app. See [BUILD_REPORT.md](BUILD_REPORT.md), [test coverage and remaining device checks](docs/TEST_PLAN.md) and [machine-readable evidence](docs/verification.json).
 
-`./tools/host-check.sh` actually compiles/tests the production Java policy, tunnel gate and bounded process on the available Java runtime. It checks Android resources, private-provider scope, cleartext configuration, the official engine hash and EJS presence. It does not compile Kotlin, run JNI on Android, verify MediaMuxer output or download from a social platform. See [BUILD_REPORT.md](BUILD_REPORT.md).
-
-Room v2 adds a persisted selected-format ID, with `MIGRATION_1_2`; no signed media URLs or authentication headers are stored. Legacy external destination/HTTP flags are disabled. There was no previously delivered working APK; if migrating an independently built v1, external file-provider URIs may no longer resolve because this version intentionally scopes the provider to private files. Review/export previous files before updating.
-
-Single-file jobs need about 2× their size, multipart/remux jobs about 3× plus 16 MiB free space. Each media request has a 15s connect / 20s read / 30-minute call timeout. Retries restart from zero and are capped at three after the initial attempt. Android background execution quotas still apply. No APK, Play Store upload, GitHub release or public source publication is performed.
-
-The bootstrap is GPLv3; its license is included in `docs/youtubedl-android-LICENSE.txt`. The yt-dlp zip includes its own component notices/licenses. Review corresponding-source and native dependency licensing before redistributing binaries. [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) records upstream sources; this source delivery does not claim redistribution compliance for an unbuilt APK.
+The bootstrap is GPLv3. Preserve upstream notices and corresponding-source obligations when redistributing binaries. [Third-party provenance](docs/THIRD_PARTY_NOTICES.md) lists upstream sources; no independent dependency security audit is claimed.
