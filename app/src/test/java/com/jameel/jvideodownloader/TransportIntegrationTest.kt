@@ -47,6 +47,7 @@ class TransportIntegrationTest {
     @Test fun rejectsHtmlWithoutDownloadingIt() = runBlocking {
         server.enqueue(MockResponse().setHeader("Content-Type", "text/html").setBody("<html>private</html>"))
         transport.open(url, true).use { response -> assertThrows(MediaFailure::class.java) { transport.mime(response) } }
+        Unit
     }
     @Test fun restrictedHttpError() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(403))

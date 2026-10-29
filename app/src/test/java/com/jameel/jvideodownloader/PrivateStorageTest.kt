@@ -5,6 +5,7 @@ import com.jameel.jvideodownloader.data.*
 import kotlinx.coroutines.*
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -14,6 +15,13 @@ import java.util.UUID
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk=[35],application=android.app.Application::class)
 class PrivateStorageTest {
+    @Before fun resetProviderRootCacheForFreshRobolectricDataDirectory() {
+        // Robolectric gives each method a new dataDir; AndroidX caches roots by authority.
+        // Real application dataDir is stable. Reset only the test process's cached strategy.
+        val field=androidx.core.content.FileProvider::class.java.getDeclaredField("sCache")
+        field.isAccessible=true
+        (field.get(null) as MutableMap<*, *>).clear()
+    }
     @Test fun publishesPrivatelyAndDeletesByScopedUri() = runBlocking {
         val context: android.content.Context=ApplicationProvider.getApplicationContext()
         val storage=MediaStorage(context); val id=UUID.randomUUID().toString()
