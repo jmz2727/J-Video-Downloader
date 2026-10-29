@@ -43,7 +43,7 @@ class DownloadWorkflowTest {
             assertTrue(app.storage.exists(saved.fileUri!!))
             ui.activityRule.scenario.recreate()
             ui.onAllNodesWithText(ui.activity.getString(R.string.downloads)).onFirst().performClick()
-            ui.onNodeWithText(ui.activity.getString(R.string.completed)).assertExists()
+            ui.onNode(hasText(saved.title) and hasAnySibling(hasText(ui.activity.getString(R.string.completed)))).assertExists()
             ui.onNodeWithText(ui.activity.getString(R.string.delete)).performClick()
             ui.onNodeWithText(ui.activity.getString(R.string.confirm)).performClick()
             ui.waitUntil(10000) { record()==null }
