@@ -28,9 +28,10 @@ class DownloadWorkflowTest {
             ui.onNodeWithText(ui.activity.getString(R.string.url)).performTextInput(link)
             ui.onNodeWithText(ui.activity.getString(R.string.analyze)).performClick()
             ui.waitUntil(45000) { ui.onAllNodesWithText(ui.activity.getString(R.string.choose_quality)).fetchSemanticsNodes().isNotEmpty() }
-            ui.onNodeWithText(ui.activity.getString(R.string.choose_quality)).performClick()
-            ui.onAllNodes(hasText("Original",substring=true) and hasClickAction()).onFirst().performClick()
-            ui.onNodeWithText(ui.activity.getString(R.string.download)).performClick()
+            ui.onNodeWithText(ui.activity.getString(R.string.choose_quality)).performScrollTo().performClick()
+            ui.waitUntil(10000) { ui.onAllNodesWithText("Original",substring=true).fetchSemanticsNodes().isNotEmpty() }
+            ui.onNodeWithText("Original",substring=true).performClick()
+            ui.onNodeWithText(ui.activity.getString(R.string.download)).performScrollTo().performClick()
             ui.waitUntil(60000) { record()?.let { MediaPolicy.terminal(it.status) }==true }
             val saved=record() ?: throw AssertionError("Download history missing")
             assertEquals("Download failed: ${saved.error}","COMPLETED",saved.status)

@@ -81,6 +81,8 @@ fun AppScreen(vm: MainViewModel) {
 @Composable private fun Home(vm: MainViewModel, recent: List<DownloadItem>, onDownloads: () -> Unit) {
     val context = LocalContext.current
     val clipboard = context.getSystemService(ClipboardManager::class.java)
+    val focus=LocalFocusManager.current
+    val keyboard=LocalSoftwareKeyboardController.current
     val preferences by vm.preferences.collectAsStateWithLifecycle()
     val permissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.download() }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -96,7 +98,7 @@ fun AppScreen(vm: MainViewModel) {
                 supportingText = { Text(stringResource(R.string.direct_hint)) })
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = { clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()?.let(vm::input) }, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.paste)) }
-                Button(onClick = vm::analyze, enabled = !vm.busy && vm.input.isNotBlank(), modifier = Modifier.weight(1f)) {
+                Button(onClick = { focus.clearFocus(); keyboard?.hide(); vm.analyze() }, enabled = !vm.busy && vm.input.isNotBlank(), modifier = Modifier.weight(1f)) {
                     if (vm.busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Text(stringResource(R.string.analyze))
                 }
             }
