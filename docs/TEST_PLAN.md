@@ -13,7 +13,7 @@ Tested source: e4b7dc5ee5737f95e4dc8e43dc6dee39ebc10358 (2026-10-29).
 - Android API 35 x86_64 emulator: 6 tests, zero skipped/failures. Navigation, malformed URL, clipboard, Arabic UI/RTL, Android Python/QuickJS/CA initialization, actual MP4 H264/AAC mux with duration/both-track checks, private storage, and complete real HTTPS UI/worker/hash/history/confirmed-delete workflow.
 - Post-test APK installation and cold activity start returned Status: ok; screenshot/logcat collected.
 
-Reports: test-and-lint-reports and device-test-reports artifacts on the run. The screenshot was collected but no manual visual inspection of that final screenshot was completed.
+Reports: test-and-lint-reports and device-test-reports artifacts on the run. The existing English home screenshot was visually inspected during the execution-status review on 2026-10-31 (Asia/Aden). Rendered Arabic visual review remains pending. This review reused stored reports/artifacts and did not rerun builds or tests.
 
 The live HTTPS test uses only our small owned MP4 fixture. Format catalog tests use metadata fixtures. Neither establishes a successful YouTube, Instagram, X or Facebook download.
 

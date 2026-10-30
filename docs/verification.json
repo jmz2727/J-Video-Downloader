@@ -26,11 +26,16 @@
     "artifact_url": "https://github.com/jmz2727/J-Video-Downloader/actions/runs/40936286375/artifacts/12925690848",
     "archive_bytes": 35618181,
     "archive_sha256": "bffed3ea92385d3bcfd0054d11dc9f1e5be972d0adfc19b8a16a8f7e2797d7af",
-    "inner_apk_sha256": "See app-arm64-v8a-debug.apk.sha256 inside artifact",
+    "inner_apk_sha256": "bc528d2c8322d808397c44e0f82f05f95b69e532c8848dba30da818d1b098518",
     "signature_verification": "PASS_APKSIGNER",
     "expires_at": "2026-11-12T19:02:48Z",
     "signing": "DEBUG",
-    "standalone_chat_attachment": false
+    "standalone_chat_attachment": true,
+    "inner_apk_bytes": 36487761,
+    "recovered_archive_sha256_match": true,
+    "apk_checksum_sidecar_match": true,
+    "archive_and_apk_crc": "PASS",
+    "binary_manifest_check": "PASS"
   },
   "android": {
     "application_id": "com.jameel.jvideodownloader",
@@ -44,7 +49,12 @@
       "armeabi-v7a",
       "x86_64"
     ],
-    "physical_arm64_test": "NOT_EXECUTED"
+    "physical_arm64_test": "NOT_EXECUTED",
+    "lint_summary": {
+      "errors": 0,
+      "fatal": 0,
+      "warnings": 39
+    }
   },
   "host_policy_assertions": {
     "passed": 87,
@@ -74,7 +84,7 @@
     "post_test_install": "PASS",
     "post_test_launch": "Status: ok",
     "screenshot_collected": true,
-    "screenshot_visual_review": "NOT_EXECUTED"
+    "screenshot_visual_review": "EXISTING_ENGLISH_HOME_SCREEN_REVIEWED_ONLY"
   },
   "engine": {
     "version": "2026.10.26",
@@ -96,5 +106,17 @@
   "remote_plaintext": "DISALLOWED_IN_PRODUCTION_PATHS",
   "ffmpeg_included": false,
   "mp3_conversion": false,
-  "public_release_published": false
+  "public_release_published": false,
+  "execution_status_review": {
+    "date": "2026-10-31",
+    "timezone": "Asia/Aden",
+    "repository_head_at_review": "6994c27f3d16861903cbbd1c8f1a23c51d16e263",
+    "ci_run_status": "completed_success",
+    "pending_ci_jobs": 0,
+    "original_delivery_blocker": "Local execution environment unavailable; standalone attachment not completed. CI APK verification had already passed.",
+    "resumed_from": "Existing verified final artifact",
+    "builds_or_tests_rerun": false,
+    "app_source_changed": false,
+    "actual_report_counters_rechecked": true
+  }
 }

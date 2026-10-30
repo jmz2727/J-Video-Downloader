@@ -15,11 +15,12 @@ Real Debug APKs were assembled for arm64-v8a, armeabi-v7a and x86_64. CI checked
 - ZIP size: **35,618,181 bytes** (about 35.6 MB).
 - GitHub artifact ID: **12925690848**; expires **2026-11-12T19:02:48Z**.
 - **ZIP archive SHA256**: `bffed3ea92385d3bcfd0054d11dc9f1e5be972d0adfc19b8a16a8f7e2797d7af`.
-- This digest is for the artifact ZIP, not the inner APK. The inner APK's own SHA256 is in its sidecar.
+- This digest is for the artifact ZIP, not the inner APK.
+- Inner ARM64 APK: **36,487,761 bytes**, SHA256 `bc528d2c8322d808397c44e0f82f05f95b69e532c8848dba30da818d1b098518`. Recovered bytes matched the CI checksum sidecar.
 - Package `com.jameel.jvideodownloader`, min SDK 26, compile/target 37. Debug signing only; no release keystore/public Release/store upload.
 - Separate armeabi-v7a and x86_64 artifacts are on the same run. Download only the device's ABI.
 
-The verified final APK is delivered through GitHub Actions. The local execution environment became unavailable during final delivery; consequently no standalone copy of this final APK was attached to the chat. Older local candidate APKs are not the final deliverable.
+The verified final APK is delivered through GitHub Actions. The local execution environment became unavailable during the original delivery, which blocked attaching a standalone copy to the chat; it did not block CI verification. During the execution-status review on 2026-10-31 (Asia/Aden), the existing final artifact was recovered and verified, and the exact inner APK was made available as a standalone chat download. Older local candidate APKs are not the final deliverable.
 
 ## Actual executed results
 
@@ -72,7 +73,7 @@ Engine: yt-dlp **2026.10.26**, **3,073,072 bytes**, pinned SHA256 `e51e69e89489f
 
 - Live anonymous social-platform extraction, audio and multiple qualities need separate verification using permitted owner-provided content. Platforms can change or reject anonymous access.
 - No MP3 conversion, DRM/authentication bypass, pause/resume, external storage location picker or universal 4K/transport support.
-- Physical ARM64 devices, API 26 and other OS versions, 16 KiB page-size compatibility, prolonged background/reboot quotas, native RAM profiling, multi-gigabyte files, accessibility/large-font and visual screenshot review were not executed.
+- Physical ARM64 devices, API 26 and other OS versions, 16 KiB page-size compatibility, prolonged background/reboot quotas, native RAM profiling, multi-gigabyte files, accessibility/large-font and rendered Arabic screenshot review were not executed. The existing English home screenshot was visually inspected during the status review; it is not evidence of the untested device/visual cases.
 - The app bounds its own transfer/sample/process-output buffers; it does not hard-cap all Python/JNI memory or prove arbitrary files are harmless. A full native TLS/network/dependency audit is outstanding.
 - Retries start over and are capped at three after the initial attempt. Staging requires about 2× single-file or 3× multipart size plus 16 MiB. Uninstall/clear-data deletes private downloads.
 - No stable release signing is configured. Future debug CI runs may have a different signing certificate; uninstalling a conflicting build deletes app-private files, so export wanted files first.
@@ -83,3 +84,19 @@ Engine: yt-dlp **2026.10.26**, **3,073,072 bytes**, pinned SHA256 `e51e69e89489f
 Source, icon, Android UI/engine/storage/history/settings/localizations, tests, complete Wrapper, CI, privacy/provenance docs and three verified APK artifacts are in the supplied repository/run. Historical v1 report remains labeled in `docs/V1_BUILD_REPORT.md`.
 
 Install the ABI-appropriate APK, then verify the desired permitted platform links on the actual phone. No repository credentials, local SDK installation or additional account authorization is needed for this delivered build.
+
+## Execution-status review — 2026-10-31 (Asia/Aden)
+
+There was **no suspended or failing APK-verification job**. Run 40936286375 is completed/success and every build/device job succeeded. The original missing standalone attachment was caused by the local tool returning **"No usable execution environment is available"** during delivery. GitHub's stored APK remained ready.
+
+At review start, the latest repository operation was documentation commit `6994c27f3d16861903cbbd1c8f1a23c51d16e263` on 2026-10-29 at 22:10:42 Asia/Aden. It followed the successful CI completion at 22:07:04. The final app install/launch returned Status: ok and the screenshot was collected at 22:06:31.
+
+Only the remaining delivery checks were performed:
+- Retrieved the existing ARM64 artifact and existing test reports; **no Gradle build, CI dispatch, emulator run, dependency update or app-source change**.
+- Verified exact archive size/SHA256, ZIP CRC, inner APK SHA256 against its sidecar, APK CRC, ARM64-only native libraries and the pinned embedded engine digest.
+- Parsed the actual binary AndroidManifest: correct package/version, min SDK 26, target 37, debug=true, backup=false, FileProvider exported=false with URI grants.
+- Parsed all seven JUnit XML suites: 28 tests, 0 failures/errors/skips. Parsed device HTML: 6 tests, 0 failures/skips.
+- Parsed lint XML: **0 Error/Fatal, 39 Warning**. Categories: dependency/plugin version suggestions (23), obsolete SDK guard (1), unused resources (8), Kotlin extension suggestions (7). These are existing warnings, not newly introduced findings or a dependency-security audit.
+- Inspected the existing English home screenshot and completed the standalone APK delivery.
+
+Current status: **BUILD PASS / APK READY**. Social-platform live tests and physical ARM64 execution remain unverified as stated above. These documentation-only changes do not alter the successfully tested production source.
